@@ -25,4 +25,9 @@ public class GameController {
         return gameRepository.getGame(id);
     }
 
+    @DeleteMapping(path = "/game/{id}")
+    public void deleteGame(@PathVariable int id) {
+        gameRepository.deleteGame(id);
+    }
+
 }

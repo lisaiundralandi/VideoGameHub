@@ -24,4 +24,8 @@ public class GameRepository {
     public Game getGame(int id) {
         return games.get(id);
     }
+
+    public void deleteGame(int id){
+        games.remove(id);
+    }
 }
