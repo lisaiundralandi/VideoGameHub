@@ -37,5 +37,19 @@ public class GameController {
         gameRepository.deleteGame(id);
     }
 
+    @PutMapping(path = "/game/{id}")
+    public void updateGame(@PathVariable int id, @RequestBody @Valid GameRequest gameRequest) {
+        Game game = gameRepository.getGame(id);
 
+        if (game == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        game.setTitle(gameRequest.getTitle());
+        game.setCreator(gameRequest.getCreator());
+        game.setPublisher(gameRequest.getPublisher());
+        game.setAgeRating(gameRequest.getAgeRating());
+        game.setCategory(gameRequest.getCategory());
+        game.setDescription(gameRequest.getDescription());
+        game.setYearOfPublishing(gameRequest.getYearOfPublishing());
+    }
 }
