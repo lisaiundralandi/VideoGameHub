@@ -2,8 +2,7 @@ package io.github.lisaiundralandi;
 
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class GameRepository {
@@ -25,7 +24,11 @@ public class GameRepository {
         return games.get(id);
     }
 
-    public void deleteGame(int id){
+    public void deleteGame(int id) {
         games.remove(id);
+    }
+
+    public Collection<Game> getAllGames() {
+        return games.values();
     }
 }
