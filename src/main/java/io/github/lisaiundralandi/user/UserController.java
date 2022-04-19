@@ -79,4 +79,13 @@ public class UserController {
         currentLogin.setLogged(false);
         currentLogin.setLogin(null);
     }
+
+    @DeleteMapping(path = "/login")
+    public void logout() {
+        if (!currentLogin.isLogged()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        currentLogin.setLogged(false);
+        currentLogin.setLogin(null);
+    }
 }
