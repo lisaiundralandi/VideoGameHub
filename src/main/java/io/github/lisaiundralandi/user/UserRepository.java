@@ -1,5 +1,6 @@
 package io.github.lisaiundralandi.user;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -15,6 +16,11 @@ public class UserRepository {
 
     public boolean doesLoginExist(String login) {
         return users.containsKey(login);
+    }
+
+    @Nullable
+    public User getUser(String login) {
+        return users.get(login);
     }
 
 }

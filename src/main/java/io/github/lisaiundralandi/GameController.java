@@ -1,5 +1,6 @@
 package io.github.lisaiundralandi;
 
+import io.github.lisaiundralandi.user.CurrentLogin;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,17 +13,31 @@ import java.util.List;
 @RestController
 public class GameController {
     private final GameRepository gameRepository;
+    private final CurrentLogin currentLogin;
 
-    public GameController(GameRepository gameRepository) {
+    public GameController(GameRepository gameRepository, CurrentLogin currentLogin) {
         this.gameRepository = gameRepository;
+        this.currentLogin = currentLogin;
     }
 
     @PostMapping(path = "/game")
     public int createGame(@RequestBody @Valid GameRequest gameRequest) {
+        if (!currentLogin.isLogged()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
         return gameRepository.addGame(
-                new Game(gameRepository.currentId(), gameRequest.getTitle(), gameRequest.getCreator(),
-                        gameRequest.getPublisher(), gameRequest.getYearOfPublishing(), gameRequest.getAgeRating(),
-                        gameRequest.getCategory(), gameRequest.getDescription()));
+                Game.builder()
+                        .id(gameRepository.currentId())
+                        .title(gameRequest.getTitle())
+                        .creator(gameRequest.getCreator())
+                        .publisher(gameRequest.getPublisher())
+                        .ageRating(gameRequest.getAgeRating())
+                        .category(gameRequest.getCategory())
+                        .description(gameRequest.getDescription())
+                        .yearOfPublishing(gameRequest.getYearOfPublishing())
+                        .addedBy(currentLogin.getLogin())
+                        .build()
+        );
     }
 
     @GetMapping(path = "/game/{id}")

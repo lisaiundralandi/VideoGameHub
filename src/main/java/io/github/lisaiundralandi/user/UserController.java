@@ -11,9 +11,11 @@ import javax.validation.Valid;
 @RestController
 public class UserController {
     private final UserRepository userRepository;
+    private final CurrentLogin currentLogin;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, CurrentLogin currentLogin) {
         this.userRepository = userRepository;
+        this.currentLogin = currentLogin;
     }
 
     @PostMapping(path = "/user")
@@ -25,5 +27,21 @@ public class UserController {
         }
         userRepository.addUser(
                 new User(userRequest.getLogin(), userRequest.getPassword()));
+    }
+
+    @PostMapping(path = "/login")
+    public void login(@RequestBody LoginRequest loginRequest) {
+        User user = userRepository.getUser(loginRequest.getLogin());
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        String password = user.getPassword();
+        String requestPassword = loginRequest.getPassword();
+
+        if (!password.equals(requestPassword)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        currentLogin.setLogged(true);
+        currentLogin.setLogin(loginRequest.getLogin());
     }
 }
