@@ -23,4 +23,8 @@ public class UserRepository {
         return users.get(login);
     }
 
+    public void deleteUser(String login) {
+        users.remove(login);
+    }
+
 }

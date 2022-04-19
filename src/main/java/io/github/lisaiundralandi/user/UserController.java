@@ -1,6 +1,7 @@
 package io.github.lisaiundralandi.user;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -67,5 +68,15 @@ public class UserController {
         }
         currentLogin.setLogged(true);
         currentLogin.setLogin(loginRequest.getLogin());
+    }
+
+    @DeleteMapping(path = "/user")
+    public void deleteUser() {
+        if (!currentLogin.isLogged()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        userRepository.deleteUser(currentLogin.getLogin());
+        currentLogin.setLogged(false);
+        currentLogin.setLogin(null);
     }
 }
