@@ -1,4 +1,4 @@
-package io.github.lisaiundralandi;
+package io.github.lisaiundralandi.game;
 
 import io.github.lisaiundralandi.user.CurrentLogin;
 import org.apache.logging.log4j.util.Strings;

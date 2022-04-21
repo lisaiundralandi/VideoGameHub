@@ -1,8 +1,6 @@
-package io.github.lisaiundralandi;
+package io.github.lisaiundralandi.game;
 
 import lombok.Getter;
-
-import java.util.List;
 
 @Getter
 public class SearchQuery {
