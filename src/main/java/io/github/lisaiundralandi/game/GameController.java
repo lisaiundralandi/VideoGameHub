@@ -29,6 +29,7 @@ public class GameController {
                         .title(gameRequest.getTitle())
                         .creator(gameRequest.getCreator())
                         .publisher(gameRequest.getPublisher())
+                        .platform(gameRequest.getPlatform())
                         .ageRating(gameRequest.getAgeRating())
                         .category(gameRequest.getCategory())
                         .description(gameRequest.getDescription())
@@ -67,6 +68,7 @@ public class GameController {
         game.setTitle(gameRequest.getTitle());
         game.setCreator(gameRequest.getCreator());
         game.setPublisher(gameRequest.getPublisher());
+        game.setPlatform(gameRequest.getPlatform());
         game.setAgeRating(gameRequest.getAgeRating());
         game.setCategory(gameRequest.getCategory());
         game.setDescription(gameRequest.getDescription());
@@ -81,6 +83,7 @@ public class GameController {
                 .filter(game -> valueContains(game.getTitle(), searchQuery.getTitle()))
                 .filter(game -> valueContains(game.getCreator(), searchQuery.getCreator()))
                 .filter(game -> valueContains(game.getPublisher(), searchQuery.getPublisher()))
+                .filter(game -> valueContains(game.getPlatform(), searchQuery.getPlatform()))
                 .filter(game -> valueContains(game.getCategory(), searchQuery.getCategory()))
                 .filter(game -> searchQuery.getYearOfPublishing() == 0 ||
                         game.getYearOfPublishing() == searchQuery.getYearOfPublishing())

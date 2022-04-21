@@ -17,6 +17,8 @@ public class GameRequest {
     private String creator;
     @NotNull
     private String publisher;
+    @NotBlank
+    private String platform;
     private int yearOfPublishing;
     private List<String> ageRating;
     private String category;

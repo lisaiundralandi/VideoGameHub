@@ -16,6 +16,7 @@ public class Game {
     private String title;
     private String creator;
     private String publisher;
+    private String platform;
     private int yearOfPublishing;
     private List<String> ageRating;
     private String category;
