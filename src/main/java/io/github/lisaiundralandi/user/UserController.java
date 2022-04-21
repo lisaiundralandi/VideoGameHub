@@ -1,5 +1,6 @@
 package io.github.lisaiundralandi.user;
 
+import io.github.lisaiundralandi.LoginUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,10 +14,13 @@ import javax.validation.Valid;
 public class UserController {
     private final UserRepository userRepository;
     private final CurrentLogin currentLogin;
+    private final LoginUtil loginUtil;
 
-    public UserController(UserRepository userRepository, CurrentLogin currentLogin) {
+    public UserController(UserRepository userRepository, CurrentLogin currentLogin,
+                          LoginUtil loginUtil) {
         this.userRepository = userRepository;
         this.currentLogin = currentLogin;
+        this.loginUtil = loginUtil;
     }
 
     @PostMapping(path = "/user")
@@ -72,9 +76,8 @@ public class UserController {
 
     @DeleteMapping(path = "/user")
     public void deleteUser() {
-        if (!currentLogin.isLogged()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
+        loginUtil.checkIfLogged();
+
         userRepository.deleteUser(currentLogin.getLogin());
         currentLogin.setLogged(false);
         currentLogin.setLogin(null);
@@ -82,9 +85,8 @@ public class UserController {
 
     @DeleteMapping(path = "/login")
     public void logout() {
-        if (!currentLogin.isLogged()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
+        loginUtil.checkIfLogged();
+
         currentLogin.setLogged(false);
         currentLogin.setLogin(null);
     }

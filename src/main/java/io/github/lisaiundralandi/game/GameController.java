@@ -1,5 +1,6 @@
 package io.github.lisaiundralandi.game;
 
+import io.github.lisaiundralandi.LoginUtil;
 import io.github.lisaiundralandi.user.CurrentLogin;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.HttpStatus;
@@ -14,15 +15,18 @@ import java.util.List;
 public class GameController {
     private final GameRepository gameRepository;
     private final CurrentLogin currentLogin;
+    private final LoginUtil loginUtil;
 
-    public GameController(GameRepository gameRepository, CurrentLogin currentLogin) {
+    public GameController(GameRepository gameRepository, CurrentLogin currentLogin,
+                          LoginUtil loginUtil) {
         this.gameRepository = gameRepository;
         this.currentLogin = currentLogin;
+        this.loginUtil = loginUtil;
     }
 
     @PostMapping(path = "/game")
     public int createGame(@RequestBody @Valid GameRequest gameRequest) {
-        checkIfLogged();
+        loginUtil.checkIfLogged();
         return gameRepository.addGame(
                 Game.builder()
                         .id(gameRepository.currentId())
@@ -51,15 +55,13 @@ public class GameController {
 
     @DeleteMapping(path = "/game/{id}")
     public void deleteGame(@PathVariable int id) {
-        checkIfLogged();
-
+        loginUtil.checkIfLogged();
         gameRepository.deleteGame(id);
     }
 
     @PutMapping(path = "/game/{id}")
     public void updateGame(@PathVariable int id, @RequestBody @Valid GameRequest gameRequest) {
-        checkIfLogged();
-
+        loginUtil.checkIfLogged();
         Game game = gameRepository.getGame(id);
 
         if (game == null) {
@@ -94,11 +96,5 @@ public class GameController {
         return query == null ||
                 (!Strings.isEmpty(query)
                         && value.contains(query));
-    }
-
-    private void checkIfLogged() {
-        if (!currentLogin.isLogged()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
     }
 }
