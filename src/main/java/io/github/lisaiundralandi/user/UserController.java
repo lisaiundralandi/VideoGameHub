@@ -2,6 +2,7 @@ package io.github.lisaiundralandi.user;
 
 import io.github.lisaiundralandi.LoginUtil;
 import io.github.lisaiundralandi.user.entity.User;
+import io.github.lisaiundralandi.user.library.UserLibraryRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -21,12 +23,15 @@ public class UserController {
     private final UserRepository userRepository;
     private final CurrentLogin currentLogin;
     private final LoginUtil loginUtil;
+    private final UserLibraryRepository userLibraryRepository;
 
     public UserController(UserRepository userRepository, CurrentLogin currentLogin,
-                          LoginUtil loginUtil) {
+                          LoginUtil loginUtil,
+                          UserLibraryRepository userLibraryRepository) {
         this.userRepository = userRepository;
         this.currentLogin = currentLogin;
         this.loginUtil = loginUtil;
+        this.userLibraryRepository = userLibraryRepository;
     }
 
     @PostMapping(path = "/user")
@@ -99,10 +104,12 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/user")
+    @Transactional
     public void deleteUser() {
         loginUtil.checkIfLogged();
 
         try {
+            userLibraryRepository.deleteAllByUserId(currentLogin.getLogin());
             userRepository.deleteById(currentLogin.getLogin());
         } catch (Exception e) {
             e.printStackTrace();

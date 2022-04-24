@@ -11,4 +11,8 @@ import java.util.List;
 public interface UserLibraryRepository extends CrudRepository<GameInLibrary, GameInLibraryId> {
 
     List<GameInLibrary> findByUserId(String userId);
+
+    void deleteAllByUserId(String userId);
+
+    void deleteAllByGameId(long gameId);
 }

@@ -3,11 +3,13 @@ package io.github.lisaiundralandi.game;
 import io.github.lisaiundralandi.LoginUtil;
 import io.github.lisaiundralandi.game.entity.Game;
 import io.github.lisaiundralandi.user.CurrentLogin;
+import io.github.lisaiundralandi.user.library.UserLibraryRepository;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -18,12 +20,15 @@ public class GameController {
     private final GameRepository gameRepository;
     private final CurrentLogin currentLogin;
     private final LoginUtil loginUtil;
+    private final UserLibraryRepository userLibraryRepository;
 
     public GameController(GameRepository gameRepository, CurrentLogin currentLogin,
-                          LoginUtil loginUtil) {
+                          LoginUtil loginUtil,
+                          UserLibraryRepository userLibraryRepository) {
         this.gameRepository = gameRepository;
         this.currentLogin = currentLogin;
         this.loginUtil = loginUtil;
+        this.userLibraryRepository = userLibraryRepository;
     }
 
     @PostMapping(path = "/game")
@@ -55,9 +60,12 @@ public class GameController {
         }
     }
 
+    @Transactional
     @DeleteMapping(path = "/game/{id}")
     public void deleteGame(@PathVariable long id) {
         loginUtil.checkIfLogged();
+
+        userLibraryRepository.deleteAllByGameId(id);
         gameRepository.deleteById(id);
     }
 
