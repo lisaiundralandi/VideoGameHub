@@ -13,5 +13,4 @@ import org.springframework.web.context.annotation.SessionScope;
 public class CurrentLogin {
     private boolean logged = false;
     private String login = null;
-
 }

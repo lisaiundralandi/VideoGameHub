@@ -1,6 +1,7 @@
 package io.github.lisaiundralandi.user;
 
 import io.github.lisaiundralandi.LoginUtil;
+import io.github.lisaiundralandi.user.entity.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -29,7 +35,7 @@ public class UserController {
 
         if (!password.equals(userRequest.getPasswordConfirmations())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords do not match");
-        } else if (userRepository.doesLoginExist(userRequest.getLogin())) {
+        } else if (userRepository.existsById(userRequest.getLogin())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Login is already taken");
         }
 
@@ -54,33 +60,56 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password has no special characters");
         }
 
-        userRepository.addUser(
-                new User(userRequest.getLogin(), password));
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA3-256");
+            byte[] result = md.digest(password.getBytes(StandardCharsets.UTF_8));
+
+            userRepository.save(
+                    new User(userRequest.getLogin(), result));
+        } catch (NoSuchAlgorithmException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+        }
+
     }
 
     @PostMapping(path = "/login")
     public void login(@RequestBody LoginRequest loginRequest) {
-        User user = userRepository.getUser(loginRequest.getLogin());
-        if (user == null) {
+        Optional<User> optionalUser = userRepository.findById(loginRequest.getLogin());
+        if (optionalUser.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
-        String password = user.getPassword();
-        String requestPassword = loginRequest.getPassword();
+        User user = optionalUser.get();
+        byte[] password = user.getPassword();
 
-        if (!password.equals(requestPassword)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA3-256");
+            byte[] result = md.digest(loginRequest.getPassword()
+                    .getBytes(StandardCharsets.UTF_8));
+
+            if (!Arrays.equals(password, result)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+            }
+            currentLogin.setLogged(true);
+            currentLogin.setLogin(loginRequest.getLogin());
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
         }
-        currentLogin.setLogged(true);
-        currentLogin.setLogin(loginRequest.getLogin());
+
     }
 
     @DeleteMapping(path = "/user")
     public void deleteUser() {
         loginUtil.checkIfLogged();
 
-        userRepository.deleteUser(currentLogin.getLogin());
-        currentLogin.setLogged(false);
-        currentLogin.setLogin(null);
+        try {
+            userRepository.deleteById(currentLogin.getLogin());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            currentLogin.setLogged(false);
+            currentLogin.setLogin(null);
+        }
     }
 
     @DeleteMapping(path = "/login")
