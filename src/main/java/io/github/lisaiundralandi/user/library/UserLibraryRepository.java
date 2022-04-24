@@ -1,10 +1,12 @@
 package io.github.lisaiundralandi.user.library;
 
-import io.github.lisaiundralandi.game.Game;
+import io.github.lisaiundralandi.game.entity.Game;
 import io.github.lisaiundralandi.user.CurrentLogin;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 @Component
 public class UserLibraryRepository {

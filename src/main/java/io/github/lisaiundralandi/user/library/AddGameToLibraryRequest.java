@@ -4,6 +4,6 @@ import lombok.Getter;
 
 @Getter
 public class AddGameToLibraryRequest {
-    private int id;
+    private long id;
 
 }
