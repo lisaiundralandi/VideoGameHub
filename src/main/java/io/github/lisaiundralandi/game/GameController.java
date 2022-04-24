@@ -3,6 +3,7 @@ package io.github.lisaiundralandi.game;
 import io.github.lisaiundralandi.LoginUtil;
 import io.github.lisaiundralandi.game.entity.Game;
 import io.github.lisaiundralandi.user.CurrentLogin;
+import io.github.lisaiundralandi.user.entity.UserType;
 import io.github.lisaiundralandi.user.library.UserLibraryRepository;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.HttpStatus;
@@ -63,7 +64,7 @@ public class GameController {
     @Transactional
     @DeleteMapping(path = "/game/{id}")
     public void deleteGame(@PathVariable long id) {
-        loginUtil.checkIfLogged();
+        loginUtil.checkAccess(UserType.ADMIN);
 
         userLibraryRepository.deleteAllByGameId(id);
         gameRepository.deleteById(id);
@@ -71,7 +72,8 @@ public class GameController {
 
     @PutMapping(path = "/game/{id}")
     public void updateGame(@PathVariable long id, @RequestBody @Valid GameRequest gameRequest) {
-        loginUtil.checkIfLogged();
+        loginUtil.checkAccess(UserType.ADMIN);
+
         Optional<Game> optionalGame = gameRepository.findById(id);
 
         if (optionalGame.isEmpty()) {

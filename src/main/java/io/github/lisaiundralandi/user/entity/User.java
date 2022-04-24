@@ -17,4 +17,5 @@ public class User {
     @Id
     private String login;
     private byte[] password;
+    private UserType type;
 }

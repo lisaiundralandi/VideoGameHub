@@ -2,6 +2,7 @@ package io.github.lisaiundralandi.user;
 
 import io.github.lisaiundralandi.LoginUtil;
 import io.github.lisaiundralandi.user.entity.User;
+import io.github.lisaiundralandi.user.entity.UserType;
 import io.github.lisaiundralandi.user.library.UserLibraryRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -70,7 +71,7 @@ public class UserController {
             byte[] result = md.digest(password.getBytes(StandardCharsets.UTF_8));
 
             userRepository.save(
-                    new User(userRequest.getLogin(), result));
+                    new User(userRequest.getLogin(), result, UserType.STANDARD));
         } catch (NoSuchAlgorithmException e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
         }
@@ -95,7 +96,7 @@ public class UserController {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
             currentLogin.setLogged(true);
-            currentLogin.setLogin(loginRequest.getLogin());
+            currentLogin.setUser(user);
 
         } catch (NoSuchAlgorithmException e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
@@ -115,7 +116,7 @@ public class UserController {
             e.printStackTrace();
         } finally {
             currentLogin.setLogged(false);
-            currentLogin.setLogin(null);
+            currentLogin.setUser(null);
         }
     }
 
@@ -124,6 +125,6 @@ public class UserController {
         loginUtil.checkIfLogged();
 
         currentLogin.setLogged(false);
-        currentLogin.setLogin(null);
+        currentLogin.setUser(null);
     }
 }

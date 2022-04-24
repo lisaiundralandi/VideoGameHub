@@ -8,6 +8,6 @@ import lombok.Getter;
 @Getter
 public class GameInLibraryResponse {
     private Game game;
-    private double rating;
+    private Double rating;
     private String status;
 }
