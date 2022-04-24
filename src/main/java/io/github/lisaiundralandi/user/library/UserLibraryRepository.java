@@ -1,35 +1,14 @@
 package io.github.lisaiundralandi.user.library;
 
-import io.github.lisaiundralandi.game.entity.Game;
-import io.github.lisaiundralandi.user.CurrentLogin;
-import org.springframework.stereotype.Component;
+import io.github.lisaiundralandi.user.library.entity.GameInLibrary;
+import io.github.lisaiundralandi.user.library.entity.GameInLibraryId;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 
-@Component
-public class UserLibraryRepository {
-    private final Map<String, HashSet<Game>> userLibrary = new HashMap<>();
-    private final CurrentLogin currentLogin;
+@Repository
+public interface UserLibraryRepository extends CrudRepository<GameInLibrary, GameInLibraryId> {
 
-    public UserLibraryRepository(CurrentLogin currentLogin) {
-        this.currentLogin = currentLogin;
-    }
-
-    public void addGame(Game game) {
-        HashSet<Game> games = userLibrary.getOrDefault(currentLogin.getLogin(), new HashSet<>());
-        games.add(game);
-        userLibrary.put(currentLogin.getLogin(), games);
-    }
-
-    public HashSet<Game> getGames() {
-        return userLibrary.get(currentLogin.getLogin());
-    }
-
-    public void removeGame(Game game) {
-        HashSet<Game> games = userLibrary.getOrDefault(currentLogin.getLogin(), new HashSet<>());
-        games.remove(game);
-        userLibrary.put(currentLogin.getLogin(), games);
-    }
+    List<GameInLibrary> findByUserId(String userId);
 }
