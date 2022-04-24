@@ -1,5 +1,6 @@
 package io.github.lisaiundralandi.user.library;
 
+import io.github.lisaiundralandi.user.library.entity.Status;
 import lombok.Getter;
 import org.springframework.lang.Nullable;
 
@@ -9,6 +10,6 @@ public class AddGameToLibraryRequest {
     @Nullable
     private Double rating;
     @Nullable
-    private String status;
+    private Status status;
 
 }

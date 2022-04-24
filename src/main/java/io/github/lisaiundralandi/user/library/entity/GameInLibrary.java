@@ -34,5 +34,5 @@ public class GameInLibrary {
     @JoinColumn(name = "game_id", nullable = false)
     private Game game;
     private Double rating;
-    private String status;
+    private Status status;
 }

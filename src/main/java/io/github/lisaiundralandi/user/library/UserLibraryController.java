@@ -37,6 +37,7 @@ public class UserLibraryController {
         if (optionalGame.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+        validateRating(request.getRating());
         userLibraryRepository.save(new GameInLibrary(
                 currentLogin.getLogin(), null, request.getId(), optionalGame.get(), request.getRating(),
                 request.getStatus()
@@ -73,8 +74,15 @@ public class UserLibraryController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         GameInLibrary game = optionalGameInLibrary.get();
+        validateRating(request.getRating());
         game.setRating(request.getRating());
         game.setStatus(request.getStatus());
         userLibraryRepository.save(game);
+    }
+
+    private void validateRating(Double rating) {
+        if (rating != null && (rating < 0 || rating > 10)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating must be between 0 and 10");
+        }
     }
 }
