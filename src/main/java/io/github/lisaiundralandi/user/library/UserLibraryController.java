@@ -62,4 +62,19 @@ public class UserLibraryController {
         }
         userLibraryRepository.deleteById(new GameInLibraryId(currentLogin.getLogin(), id));
     }
+
+    @PutMapping(path = "/library/{gameId}")
+    public void updateGame(@PathVariable long gameId, @RequestBody UpdateGameRequest request) {
+
+        Optional<GameInLibrary> optionalGameInLibrary = userLibraryRepository.findById(
+                new GameInLibraryId(currentLogin.getLogin(), gameId));
+
+        if (optionalGameInLibrary.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        GameInLibrary game = optionalGameInLibrary.get();
+        game.setRating(request.getRating());
+        game.setStatus(request.getStatus());
+        userLibraryRepository.save(game);
+    }
 }

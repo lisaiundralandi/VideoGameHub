@@ -5,6 +5,7 @@ import io.github.lisaiundralandi.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -13,6 +14,7 @@ import javax.persistence.*;
 @Entity
 @IdClass(GameInLibraryId.class)
 @Getter
+@Setter
 public class GameInLibrary {
     @Id
     @Column(name = "user_id")
