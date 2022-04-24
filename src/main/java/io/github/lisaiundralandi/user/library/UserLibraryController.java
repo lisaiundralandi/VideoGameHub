@@ -6,11 +6,13 @@ import io.github.lisaiundralandi.game.entity.Game;
 import io.github.lisaiundralandi.user.CurrentLogin;
 import io.github.lisaiundralandi.user.library.entity.GameInLibrary;
 import io.github.lisaiundralandi.user.library.entity.GameInLibraryId;
+import io.github.lisaiundralandi.user.library.entity.Status;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -66,6 +68,7 @@ public class UserLibraryController {
 
     @PutMapping(path = "/library/{gameId}")
     public void updateGame(@PathVariable long gameId, @RequestBody UpdateGameRequest request) {
+        loginUtil.checkIfLogged();
 
         Optional<GameInLibrary> optionalGameInLibrary = userLibraryRepository.findById(
                 new GameInLibraryId(currentLogin.getLogin(), gameId));
@@ -78,6 +81,23 @@ public class UserLibraryController {
         game.setRating(request.getRating());
         game.setStatus(request.getStatus());
         userLibraryRepository.save(game);
+    }
+
+    @GetMapping(path = "/library/find")
+    public List<GameInLibraryResponse> findGamesInLibrary(
+            @RequestParam(value = "status", required = false) Status status,
+            @RequestParam(value = "rating", required = false) Double rating
+    ) {
+        loginUtil.checkIfLogged();
+
+        List<GameInLibrary> gamesInLibrary = userLibraryRepository.findByUserId(currentLogin.getLogin());
+
+        return gamesInLibrary.stream()
+                .filter(gameInLibrary -> status == null || gameInLibrary.getStatus() == status)
+                .filter(gameInLibrary -> rating == null || Objects.equals(gameInLibrary.getRating(), rating))
+                .map(gameInLibrary -> new GameInLibraryResponse(gameInLibrary.getGame(), gameInLibrary.getRating(),
+                        gameInLibrary.getStatus()))
+                .toList();
     }
 
     private void validateRating(Double rating) {
