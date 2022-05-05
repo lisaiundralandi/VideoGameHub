@@ -1,0 +1,464 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+paths:
+  /user:
+    put:
+      tags:
+        - user-controller
+      summary: Zmienia hasło użytkownika
+      operationId: changePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+        required: true
+      responses:
+        "200":
+          description: Hasło zmienione pomyślnie
+        "401":
+          description: Użytkownik niezalogowany
+        "400":
+          description: Hasło nie spełnia wymagań
+        "403":
+          description: Stare hasło jest niepoprawne
+    post:
+      tags:
+        - user-controller
+      summary: Dodaje użytkownika
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      responses:
+        "200":
+          description: Użytkownik dodany pomyślnie
+        "400":
+          description: Użytkownik istnieje lub hasło nie spełnia wymagań
+    delete:
+      tags:
+        - user-controller
+      summary: Usuwa zalogowanego użytkownika
+      operationId: deleteUser
+      responses:
+        "200":
+          description: Użytkownik usunięty pomyślnie
+        "401":
+          description: Użytkownik niezalogowany
+  /library/{gameId}:
+    put:
+      tags:
+        - user-library-controller
+      summary: Aktualizuje ocenę i status gry w bibliotece
+      operationId: updateGame
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGameRequest'
+        required: true
+      responses:
+        "200":
+          description: Gra zaktualizowana pomyślnie
+        "401":
+          description: Użytkownik niezalogowany
+        "404":
+          description: Gra nie jest dodana do biblioteki
+  /game/{id}:
+    get:
+      tags:
+        - game-controller
+      summary: Zwraca grę o podanym identyfikatorze
+      operationId: getGame
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Zwraca grę
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Game'
+        "404":
+          description: Gra nie istnieje
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Game'
+    put:
+      tags:
+        - game-controller
+      summary: Aktualizuje szczegóły gry o podanym identyfikatorze
+      operationId: updateGame_1
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameRequest'
+        required: true
+      responses:
+        "200":
+          description: Gra zaktualizowana pomyślnie
+        "401":
+          description: Użytkownik niezalogowany
+        "403":
+          description: Użytkownik nie jest administratorem
+        "404":
+          description: Gra nie istnieje
+    delete:
+      tags:
+        - game-controller
+      summary: Usuwa grę z bazy danych gier
+      operationId: deleteGame
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Gra usunięta pomyślnie
+        "401":
+          description: Użytkownik niezalogowany
+        "403":
+          description: Użytkownik nie jest administratorem
+  /login:
+    post:
+      tags:
+        - user-controller
+      summary: Loguje użytkownika w bieżącej sesji
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        "200":
+          description: Użytkownik zalogowany pomyślnie
+        "401":
+          description: Zły login lub hasło
+    delete:
+      tags:
+        - user-controller
+      summary: Wylogowuje użytkownika
+      operationId: logout
+      responses:
+        "200":
+          description: Użytkownik wylogowany pomyślnie
+        "401":
+          description: Użytkownik niezalogowany
+  /library:
+    get:
+      tags:
+        - user-library-controller
+      summary: Zwraca całą bibliotekę użytkownika
+      operationId: getUserLibrary
+      responses:
+        "200":
+          description: Zwraca listę gier
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameInLibraryResponse'
+        "401":
+          description: Użytkownik niezalogowany
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameInLibraryResponse'
+    post:
+      tags:
+        - user-library-controller
+      summary: Dodaje grę do biblioteki użytkownika
+      operationId: addToLibrary
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddGameToLibraryRequest'
+        required: true
+      responses:
+        "200":
+          description: Gra dodana pomyślnie
+        "401":
+          description: Użytkownik niezalogowany
+        "404":
+          description: Gra nie istnieje
+    delete:
+      tags:
+        - user-library-controller
+      summary: Usuwa grę z biblioteki użytkownika
+      operationId: removeGame
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Gra usunięta pomyślnie
+        "401":
+          description: Użytkownik niezalogowany
+        "404":
+          description: Gra nie jest dodana do biblioteki
+  /game:
+    post:
+      tags:
+        - game-controller
+      summary: Dodaje grę do bazy danych
+      operationId: createGame
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameRequest'
+        required: true
+      responses:
+        "200":
+          description: "Gra dodana pomyślnie, zwraca identyfikator dodanej gry"
+          content:
+            '*/*':
+              schema:
+                type: integer
+                format: int64
+        "401":
+          description: Użytkownik niezalogowany
+          content:
+            '*/*':
+              schema:
+                type: integer
+                format: int64
+  /game/find:
+    post:
+      tags:
+        - game-controller
+      summary: Zwraca listę gier pasujących do kryteriów
+      operationId: findGame
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchQuery'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+  /library/find:
+    get:
+      tags:
+        - user-library-controller
+      summary: Wyszukuje gry w bibliotece na podstawie oceny i statusu
+      operationId: findGamesInLibrary
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/Status'
+        - name: rating
+          in: query
+          required: false
+          schema:
+            type: number
+            format: double
+      responses:
+        "200":
+          description: Zwraca listę gier
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameInLibraryResponse'
+        "401":
+          description: Użytkownik niezalogowany
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameInLibraryResponse'
+components:
+  schemas:
+    ChangePasswordRequest:
+      required:
+        - newPassword
+        - newPasswordConfirmations
+        - password
+      type: object
+      properties:
+        password:
+          type: string
+        newPassword:
+          type: string
+        newPasswordConfirmations:
+          type: string
+    Status:
+      type: string
+      enum:
+        - OWNED
+        - PREOWNED
+        - WISHLIST
+        - PREORDERED
+    UpdateGameRequest:
+      type: object
+      properties:
+        rating:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/Status'
+    GameRequest:
+      required:
+        - creator
+        - platform
+        - publisher
+        - title
+      type: object
+      properties:
+        title:
+          type: string
+        creator:
+          type: string
+        publisher:
+          type: string
+        platform:
+          type: string
+        yearOfPublishing:
+          type: integer
+          format: int32
+        ageRating:
+          type: array
+          items:
+            type: string
+        category:
+          type: string
+        description:
+          type: string
+    UserRequest:
+      required:
+        - login
+        - password
+        - passwordConfirmations
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+        passwordConfirmations:
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+    AddGameToLibraryRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        rating:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/Status'
+    SearchQuery:
+      type: object
+      properties:
+        title:
+          type: string
+        creator:
+          type: string
+        publisher:
+          type: string
+        platform:
+          type: string
+        yearOfPublishing:
+          type: integer
+          format: int32
+        category:
+          type: string
+    Game:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        creator:
+          type: string
+        publisher:
+          type: string
+        platform:
+          type: string
+        yearOfPublishing:
+          type: integer
+          format: int32
+        ageRating:
+          type: array
+          items:
+            type: string
+        category:
+          type: string
+        description:
+          type: string
+        addedBy:
+          type: string
+    GameInLibraryResponse:
+      type: object
+      properties:
+        game:
+          $ref: '#/components/schemas/Game'
+        rating:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/Status'

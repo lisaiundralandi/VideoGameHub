@@ -7,6 +7,8 @@ import io.github.lisaiundralandi.user.CurrentLogin;
 import io.github.lisaiundralandi.user.library.entity.GameInLibrary;
 import io.github.lisaiundralandi.user.library.entity.GameInLibraryId;
 import io.github.lisaiundralandi.user.library.entity.Status;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,6 +35,11 @@ public class UserLibraryController {
     }
 
     @PostMapping(path = "/library")
+    @Operation(summary = "Dodaje grę do biblioteki użytkownika", responses = {
+            @ApiResponse(responseCode = "200", description = "Gra dodana pomyślnie"),
+            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany"),
+            @ApiResponse(responseCode = "404", description = "Gra nie istnieje")
+    })
     public void addToLibrary(@RequestBody AddGameToLibraryRequest request) {
         loginUtil.checkIfLogged();
         Optional<Game> optionalGame = gameRepository.findById(request.getId());
@@ -47,6 +54,10 @@ public class UserLibraryController {
     }
 
     @GetMapping(path = "/library")
+    @Operation(summary = "Zwraca całą bibliotekę użytkownika", responses = {
+            @ApiResponse(responseCode = "200", description = "Zwraca listę gier"),
+            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany")
+    })
     public List<GameInLibraryResponse> getUserLibrary() {
         loginUtil.checkIfLogged();
         return userLibraryRepository.findByUserId(currentLogin.getLogin())
@@ -57,6 +68,11 @@ public class UserLibraryController {
     }
 
     @DeleteMapping(path = "/library")
+    @Operation(summary = "Usuwa grę z biblioteki użytkownika", responses = {
+            @ApiResponse(responseCode = "200", description = "Gra usunięta pomyślnie"),
+            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany"),
+            @ApiResponse(responseCode = "404", description = "Gra nie jest dodana do biblioteki")
+    })
     public void removeGame(@RequestParam("id") long id) {
         loginUtil.checkIfLogged();
 
@@ -67,6 +83,11 @@ public class UserLibraryController {
     }
 
     @PutMapping(path = "/library/{gameId}")
+    @Operation(summary = "Aktualizuje ocenę i status gry w bibliotece", responses = {
+            @ApiResponse(responseCode = "200", description = "Gra zaktualizowana pomyślnie"),
+            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany"),
+            @ApiResponse(responseCode = "404", description = "Gra nie jest dodana do biblioteki")
+    })
     public void updateGame(@PathVariable long gameId, @RequestBody UpdateGameRequest request) {
         loginUtil.checkIfLogged();
 
@@ -84,6 +105,10 @@ public class UserLibraryController {
     }
 
     @GetMapping(path = "/library/find")
+    @Operation(summary = "Wyszukuje gry w bibliotece na podstawie oceny i statusu", responses = {
+            @ApiResponse(responseCode = "200", description = "Zwraca listę gier"),
+            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany")
+    })
     public List<GameInLibraryResponse> findGamesInLibrary(
             @RequestParam(value = "status", required = false) Status status,
             @RequestParam(value = "rating", required = false) Double rating

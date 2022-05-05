@@ -34,7 +34,8 @@ należy zmodyfikować plik `application.properties` tak, aby zawierał poprawną
 
 ## Dokumentacja API
 
-WIP
+Dostępna pod adresem `http://localhost:8080/swagger-ui/index.html` po uruchomieniu aplikacji. Kopia w formacie YAML
+dostępna w repozytorium w pliku [api-docs.yaml](api-docs.yaml).
 
 ## Kolekcja Postman
 

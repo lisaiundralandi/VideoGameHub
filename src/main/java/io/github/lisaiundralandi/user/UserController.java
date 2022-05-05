@@ -5,6 +5,8 @@ import io.github.lisaiundralandi.PasswordUtil;
 import io.github.lisaiundralandi.user.entity.User;
 import io.github.lisaiundralandi.user.entity.UserType;
 import io.github.lisaiundralandi.user.library.UserLibraryRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -37,6 +39,10 @@ public class UserController {
     }
 
     @PostMapping(path = "/user")
+    @Operation(summary = "Dodaje użytkownika", responses = {
+            @ApiResponse(responseCode = "200", description = "Użytkownik dodany pomyślnie"),
+            @ApiResponse(responseCode = "400", description = "Użytkownik istnieje lub hasło nie spełnia wymagań")
+    })
     public void createUser(@RequestBody @Valid UserRequest userRequest) {
         String password = userRequest.getPassword();
 
@@ -61,6 +67,10 @@ public class UserController {
     }
 
     @PostMapping(path = "/login")
+    @Operation(summary = "Loguje użytkownika w bieżącej sesji", responses = {
+            @ApiResponse(responseCode = "200", description = "Użytkownik zalogowany pomyślnie"),
+            @ApiResponse(responseCode = "401", description = "Zły login lub hasło")
+    })
     public void login(@RequestBody LoginRequest loginRequest) {
         Optional<User> optionalUser = userRepository.findById(loginRequest.getLogin());
         if (optionalUser.isEmpty()) {
@@ -88,6 +98,10 @@ public class UserController {
 
     @DeleteMapping(path = "/user")
     @Transactional
+    @Operation(summary = "Usuwa zalogowanego użytkownika", responses = {
+            @ApiResponse(responseCode = "200", description = "Użytkownik usunięty pomyślnie"),
+            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany")
+    })
     public void deleteUser() {
         loginUtil.checkIfLogged();
 
@@ -103,6 +117,10 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/login")
+    @Operation(summary = "Wylogowuje użytkownika", responses = {
+            @ApiResponse(responseCode = "200", description = "Użytkownik wylogowany pomyślnie"),
+            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany")
+    })
     public void logout() {
         loginUtil.checkIfLogged();
 
@@ -111,6 +129,12 @@ public class UserController {
     }
 
     @PutMapping(path = "/user")
+    @Operation(summary = "Zmienia hasło użytkownika", responses = {
+            @ApiResponse(responseCode = "200", description = "Hasło zmienione pomyślnie"),
+            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany"),
+            @ApiResponse(responseCode = "400", description = "Hasło nie spełnia wymagań"),
+            @ApiResponse(responseCode = "403", description = "Stare hasło jest niepoprawne")
+    })
     public void changePassword(@RequestBody ChangePasswordRequest request) {
         loginUtil.checkIfLogged();
 

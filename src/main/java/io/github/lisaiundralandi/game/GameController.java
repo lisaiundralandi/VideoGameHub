@@ -5,6 +5,8 @@ import io.github.lisaiundralandi.game.entity.Game;
 import io.github.lisaiundralandi.user.CurrentLogin;
 import io.github.lisaiundralandi.user.entity.UserType;
 import io.github.lisaiundralandi.user.library.UserLibraryRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +35,10 @@ public class GameController {
     }
 
     @PostMapping(path = "/game")
+    @Operation(responses = {
+            @ApiResponse(responseCode = "200", description = "Gra dodana pomyślnie, zwraca identyfikator dodanej gry"),
+            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany")
+    }, summary = "Dodaje grę do bazy danych")
     public long createGame(@RequestBody @Valid GameRequest gameRequest) {
         loginUtil.checkIfLogged();
         return gameRepository.save(
@@ -52,6 +58,10 @@ public class GameController {
     }
 
     @GetMapping(path = "/game/{id}")
+    @Operation(summary = "Zwraca grę o podanym identyfikatorze", responses = {
+            @ApiResponse(responseCode = "200", description = "Zwraca grę"),
+            @ApiResponse(responseCode = "404", description = "Gra nie istnieje")
+    })
     public Game getGame(@PathVariable long id) {
         Optional<Game> game = gameRepository.findById(id);
         if (game.isEmpty()) {
@@ -63,6 +73,12 @@ public class GameController {
 
     @Transactional
     @DeleteMapping(path = "/game/{id}")
+    @Operation(summary = "Usuwa grę z bazy danych gier",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Gra usunięta pomyślnie"),
+                    @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany"),
+                    @ApiResponse(responseCode = "403", description = "Użytkownik nie jest administratorem")
+            })
     public void deleteGame(@PathVariable long id) {
         loginUtil.checkAccess(UserType.ADMIN);
 
@@ -71,6 +87,13 @@ public class GameController {
     }
 
     @PutMapping(path = "/game/{id}")
+    @Operation(summary = "Aktualizuje szczegóły gry o podanym identyfikatorze",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Gra zaktualizowana pomyślnie"),
+                    @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany"),
+                    @ApiResponse(responseCode = "403", description = "Użytkownik nie jest administratorem"),
+                    @ApiResponse(responseCode = "404", description = "Gra nie istnieje")
+            })
     public void updateGame(@PathVariable long id, @RequestBody @Valid GameRequest gameRequest) {
         loginUtil.checkAccess(UserType.ADMIN);
 
@@ -92,6 +115,7 @@ public class GameController {
     }
 
     @PostMapping(path = "/game/find")
+    @Operation(summary = "Zwraca listę gier pasujących do kryteriów")
     public List<Game> findGame(@RequestBody SearchQuery searchQuery) {
         Iterable<Game> games = gameRepository.findAll();
 
