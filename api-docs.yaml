@@ -57,7 +57,8 @@ paths:
     put:
       tags:
         - user-library-controller
-      summary: Aktualizuje ocenę i status gry w bibliotece
+      summary: Aktualizuje grę w bibliotece
+      description: Aktualizuje ocenę i status gry w bibliotece oraz to czy w nią grano
       operationId: updateGame
       parameters:
         - name: gameId
@@ -290,7 +291,9 @@ paths:
     get:
       tags:
         - user-library-controller
-      summary: Wyszukuje gry w bibliotece na podstawie oceny i statusu
+      summary: Wyszukuje gry w bibliotece
+      description: "Wyszukuje gry w bibliotece na podstawie oceny, statusu i tego,\
+        \ czy w nią grano "
       operationId: findGamesInLibrary
       parameters:
         - name: status
@@ -304,6 +307,11 @@ paths:
           schema:
             type: number
             format: double
+        - name: played
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: Zwraca listę gier
@@ -351,6 +359,8 @@ components:
           format: double
         status:
           $ref: '#/components/schemas/Status'
+        played:
+          type: boolean
     GameRequest:
       required:
         - creator
@@ -409,6 +419,8 @@ components:
           format: double
         status:
           $ref: '#/components/schemas/Status'
+        played:
+          type: boolean
     SearchQuery:
       type: object
       properties:
@@ -462,3 +474,5 @@ components:
           format: double
         status:
           $ref: '#/components/schemas/Status'
+        played:
+          type: boolean

@@ -11,4 +11,5 @@ public class GameInLibraryResponse {
     private Game game;
     private Double rating;
     private Status status;
+    private boolean played;
 }

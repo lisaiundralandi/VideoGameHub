@@ -49,7 +49,7 @@ public class UserLibraryController {
         validateRating(request.getRating());
         userLibraryRepository.save(new GameInLibrary(
                 currentLogin.getLogin(), null, request.getId(), optionalGame.get(), request.getRating(),
-                request.getStatus()
+                request.getStatus(), request.isPlayed()
         ));
     }
 
@@ -63,7 +63,7 @@ public class UserLibraryController {
         return userLibraryRepository.findByUserId(currentLogin.getLogin())
                 .stream()
                 .map(gameInLibrary -> new GameInLibraryResponse(gameInLibrary.getGame(), gameInLibrary.getRating(),
-                        gameInLibrary.getStatus()))
+                        gameInLibrary.getStatus(), gameInLibrary.isPlayed()))
                 .toList();
     }
 
@@ -83,11 +83,13 @@ public class UserLibraryController {
     }
 
     @PutMapping(path = "/library/{gameId}")
-    @Operation(summary = "Aktualizuje ocenę i status gry w bibliotece", responses = {
-            @ApiResponse(responseCode = "200", description = "Gra zaktualizowana pomyślnie"),
-            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany"),
-            @ApiResponse(responseCode = "404", description = "Gra nie jest dodana do biblioteki")
-    })
+    @Operation(summary = "Aktualizuje grę w bibliotece",
+            description = "Aktualizuje ocenę i status gry w bibliotece oraz to czy w nią grano",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Gra zaktualizowana pomyślnie"),
+                    @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany"),
+                    @ApiResponse(responseCode = "404", description = "Gra nie jest dodana do biblioteki")
+            })
     public void updateGame(@PathVariable long gameId, @RequestBody UpdateGameRequest request) {
         loginUtil.checkIfLogged();
 
@@ -101,17 +103,21 @@ public class UserLibraryController {
         validateRating(request.getRating());
         game.setRating(request.getRating());
         game.setStatus(request.getStatus());
+        game.setPlayed(request.isPlayed());
         userLibraryRepository.save(game);
     }
 
     @GetMapping(path = "/library/find")
-    @Operation(summary = "Wyszukuje gry w bibliotece na podstawie oceny i statusu", responses = {
-            @ApiResponse(responseCode = "200", description = "Zwraca listę gier"),
-            @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany")
-    })
+    @Operation(summary = "Wyszukuje gry w bibliotece",
+            description = "Wyszukuje gry w bibliotece na podstawie oceny, statusu i tego, czy w nią grano ",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Zwraca listę gier"),
+                    @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany")
+            })
     public List<GameInLibraryResponse> findGamesInLibrary(
             @RequestParam(value = "status", required = false) Status status,
-            @RequestParam(value = "rating", required = false) Double rating
+            @RequestParam(value = "rating", required = false) Double rating,
+            @RequestParam(value = "played", required = false) Boolean played
     ) {
         loginUtil.checkIfLogged();
 
@@ -120,8 +126,9 @@ public class UserLibraryController {
         return gamesInLibrary.stream()
                 .filter(gameInLibrary -> status == null || gameInLibrary.getStatus() == status)
                 .filter(gameInLibrary -> rating == null || Objects.equals(gameInLibrary.getRating(), rating))
+                .filter(gameInLibrary -> played == null || gameInLibrary.isPlayed() == played)
                 .map(gameInLibrary -> new GameInLibraryResponse(gameInLibrary.getGame(), gameInLibrary.getRating(),
-                        gameInLibrary.getStatus()))
+                        gameInLibrary.getStatus(), gameInLibrary.isPlayed()))
                 .toList();
     }
 

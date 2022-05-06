@@ -11,5 +11,6 @@ public class AddGameToLibraryRequest {
     private Double rating;
     @Nullable
     private Status status;
+    private boolean played;
 
 }

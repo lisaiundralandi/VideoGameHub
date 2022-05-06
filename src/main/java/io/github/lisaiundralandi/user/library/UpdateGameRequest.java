@@ -7,4 +7,5 @@ import lombok.Getter;
 public class UpdateGameRequest {
     private Double rating;
     private Status status;
+    private boolean played;
 }
