@@ -4,6 +4,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 @Component
 public class PasswordUtil {
 
@@ -31,6 +35,17 @@ public class PasswordUtil {
 
         if (!password.equals(passwordConfirmations)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords do not match");
+        }
+    }
+
+    public byte[] hash(String password) {
+        try {
+
+            MessageDigest md = MessageDigest.getInstance("SHA3-256");
+            return md.digest(password.getBytes(StandardCharsets.UTF_8));
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
         }
     }
 }

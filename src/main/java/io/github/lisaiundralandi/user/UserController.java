@@ -13,9 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -54,16 +51,10 @@ public class UserController {
 
         passwordUtil.checkPassword(userRequest.getPassword(), userRequest.getPasswordConfirmations());
 
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA3-256");
-            byte[] result = md.digest(password.getBytes(StandardCharsets.UTF_8));
+        byte[] result = passwordUtil.hash(password);
 
-            userRepository.save(
-                    new User(userRequest.getLogin(), result, UserType.STANDARD));
-        } catch (NoSuchAlgorithmException e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
-        }
-
+        userRepository.save(
+                new User(userRequest.getLogin(), result, UserType.STANDARD));
     }
 
     @PostMapping(path = "/login")
@@ -72,28 +63,16 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Zły login lub hasło")
     })
     public void login(@RequestBody LoginRequest loginRequest) {
-        Optional<User> optionalUser = userRepository.findById(loginRequest.getLogin());
-        if (optionalUser.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        User user = optionalUser.get();
+        User user = getUser(loginRequest.getLogin());
         byte[] password = user.getPassword();
 
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA3-256");
-            byte[] result = md.digest(loginRequest.getPassword()
-                    .getBytes(StandardCharsets.UTF_8));
+        byte[] result = passwordUtil.hash(loginRequest.getPassword());
 
-            if (!Arrays.equals(password, result)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-            }
-            currentLogin.setLogged(true);
-            currentLogin.setUser(user);
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+        if (!Arrays.equals(password, result)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
-
+        currentLogin.setLogged(true);
+        currentLogin.setUser(user);
     }
 
     @DeleteMapping(path = "/user")
@@ -138,32 +117,28 @@ public class UserController {
     public void changePassword(@RequestBody ChangePasswordRequest request) {
         loginUtil.checkIfLogged();
 
-        Optional<User> optionalUser = userRepository.findById(currentLogin.getLogin());
+        User user = getUser(currentLogin.getLogin());
+        byte[] password = user.getPassword();
+
+        byte[] oldPassword = passwordUtil.hash(request.getPassword());
+
+        if (!Arrays.equals(password, oldPassword)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        passwordUtil.checkPassword(request.getNewPassword(), request.getNewPasswordConfirmations());
+
+        byte[] newPassword = passwordUtil.hash(request.getNewPassword());
+
+        user.setPassword(newPassword);
+        userRepository.save(user);
+    }
+
+    private User getUser(String login) {
+        Optional<User> optionalUser = userRepository.findById(login);
         if (optionalUser.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
-        User user = optionalUser.get();
-        byte[] password = user.getPassword();
-
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA3-256");
-            byte[] oldPassword = md.digest(request.getPassword()
-                    .getBytes(StandardCharsets.UTF_8));
-
-            if (!Arrays.equals(password, oldPassword)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-            }
-
-            passwordUtil.checkPassword(request.getNewPassword(), request.getNewPasswordConfirmations());
-
-            byte[] newPassword = md.digest(request.getNewPassword()
-                    .getBytes(StandardCharsets.UTF_8));
-
-            user.setPassword(newPassword);
-            userRepository.save(user);
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
-        }
+        return optionalUser.get();
     }
 }
