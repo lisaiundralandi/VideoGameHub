@@ -1,0 +1,507 @@
+{
+  "info": {
+    "_postman_id": "dcbc683f-e6ef-46bb-9293-5b1b357ebd4d",
+    "name": "VGH",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "dodawanie użytkownika",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n   \"login\":\"testuser\",\n   \"password\":\"8tXjVGxCPGhPQNLtVZu2sw==\",\n   \"passwordConfirmations\":\"8tXjVGxCPGhPQNLtVZu2sw==\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/user",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "user"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "logowanie",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n   \"login\":\"testuser\",\n   \"password\":\"8tXjVGxCPGhPQNLtVZu2sw==\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "dodawanie gry",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Extract game id\", function () {",
+              "    pm.collectionVariables.set(\"game_id\", pm.response.text());",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"Elden Ring\",\n    \"creator\": \"From Software\",\n    \"publisher\": \"Bandai Namco\",\n    \"platform\": \"PS5\",\n    \"yearOfPublishing\": 2022,\n    \"ageRating\": [\n        \"PEGI 16\",\n        \"ESRB M\"\n    ],\n    \"category\": \"Souls-like\",\n    \"description\": \"You died\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/game",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "szczegóły gry",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/game/{{game_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            "{{game_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "wyszukiwanie gry",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"Elde\",\n\"category\":\"Souls\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/game/find",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            "find"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "dodawanie gry do bilblioteki",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"id\": {{game_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/library",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "library"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "wyświetlanie gier w bibliotece",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/library",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "library"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "wyszukiwanie gry w bibliotece",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/library/find?status=OWNED&rating=10.0&played=true",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "library",
+            "find"
+          ],
+          "query": [
+            {
+              "key": "status",
+              "value": "OWNED"
+            },
+            {
+              "key": "rating",
+              "value": "10.0"
+            },
+            {
+              "key": "played",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "aktualizacja gry w bibliotece",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"rating\": 10,\n    \"status\": \"OWNED\",\n    \"played\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/library/{{game_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "library",
+            "{{game_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "usuń grę z biblioteki",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/library?id={{game_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "library"
+          ],
+          "query": [
+            {
+              "key": "id",
+              "value": "{{game_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "aktualizacja gry",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"Elden Ring\",\n    \"creator\": \"From Software\",\n    \"publisher\": \"Bandai Namco\",\n    \"platform\": \"PS5\",\n    \"yearOfPublishing\": 2022,\n    \"ageRating\": [\n        \"PEGI 16\",\n        \"ESRB M\"\n    ],\n    \"category\": \"Souls-like\",\n    \"description\": \"You died!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/game/{{game_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            "{{game_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "usuń grę",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/game/{{game_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "game",
+            "{{game_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "wylogowanie użytkownika",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "usuń użytkownika",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/user",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "user"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "zmiana hasła",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n   \"password\":\"8tXjVGxCPGhPQNLtVZu2sw==\",\n   \"newPassword\":\"8tXjVGxCPGhPQNLtVZu2sw==!\",\n   \"newPasswordConfirmations\":\"8tXjVGxCPGhPQNLtVZu2sw==!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/user",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "user"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "game_id",
+      "value": "1"
+    }
+  ]
+}

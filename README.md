@@ -39,5 +39,7 @@ dostępna w repozytorium w pliku [api-docs.yaml](api-docs.yaml).
 
 ## Kolekcja Postman
 
-WIP
+W pliku [VGH.postman_collection.json](VGH.postman_collection.json). Do niektórych operacji (np. aktualizacja i usuwanie
+gry)
+użytkownik musi być administratorem.
 
