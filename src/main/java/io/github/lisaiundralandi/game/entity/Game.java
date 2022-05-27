@@ -3,10 +3,7 @@ package io.github.lisaiundralandi.game.entity;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +24,7 @@ public class Game {
     private String publisher;
     private String platform;
     private int yearOfPublishing;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> ageRating;
     private String category;
     private String description;

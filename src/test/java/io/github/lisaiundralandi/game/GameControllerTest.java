@@ -1,5 +1,6 @@
 package io.github.lisaiundralandi.game;
 
+import io.github.lisaiundralandi.TestUserUtil;
 import io.github.lisaiundralandi.game.entity.Game;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,12 +13,15 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GameControllerTest {
+
+    @Autowired
+    private TestUserUtil testUserUtil;
 
     @Autowired
     private GameRepository gameRepository;
@@ -110,6 +114,98 @@ class GameControllerTest {
         assertEquals(HttpStatus.OK, responseStatusCode);
         assertNotNull(response.getBody());
         assertEquals(List.of(), List.of(response.getBody()));
+    }
+
+    @Test
+    void shouldAddGame() {
+        testUserUtil.createAndLogin("testerForAdding");
+
+        GameRequest gameRequest = GameRequest.builder()
+                .title("test game 3")
+                .creator("creator")
+                .publisher("publisher")
+                .platform("PS5")
+                .ageRating(Arrays.asList("16", "M"))
+                .category("category")
+                .description("description")
+                .yearOfPublishing(2022)
+                .build();
+
+        ResponseEntity<Long> response = restTemplate.postForEntity("http://localhost:" + port + "/game",
+                gameRequest, long.class);
+
+        HttpStatus responseStatusCode = response.getStatusCode();
+        assertEquals(HttpStatus.OK, responseStatusCode);
+
+        Long responseBody = response.getBody();
+        assertNotNull(responseBody);
+        Optional<Game> optionalGame = gameRepository.findById(responseBody);
+        assertTrue(optionalGame.isPresent());
+
+        assertEquals("testerForAdding", optionalGame.get()
+                .getAddedBy());
+    }
+
+    @Test
+    void shouldDeleteGame() {
+        testUserUtil.createAndLoginAdmin("testerForDeleting");
+
+        Game game = gameRepository.save(
+                Game.builder()
+                        .title("test game 4")
+                        .creator("creator")
+                        .publisher("publisher")
+                        .platform("PS5")
+                        .ageRating(Arrays.asList("16", "M"))
+                        .category("category")
+                        .description("description")
+                        .yearOfPublishing(2022)
+                        .addedBy("user")
+                        .build()
+
+        );
+
+        restTemplate.delete("http://localhost:" + port + "/game/" + game.getId());
+        assertFalse(gameRepository.existsById(game.getId()));
+    }
+
+
+    @Test
+    void shouldUpdateGame() {
+        testUserUtil.createAndLoginAdmin("testerForUpdating");
+
+        Game game = gameRepository.save(
+                Game.builder()
+                        .title("test game 5")
+                        .creator("creator")
+                        .publisher("publisher")
+                        .platform("PS5")
+                        .ageRating(Arrays.asList("16", "M"))
+                        .category("category")
+                        .description("description")
+                        .yearOfPublishing(2022)
+                        .addedBy("user")
+                        .build()
+
+        );
+
+        GameRequest gameRequest = GameRequest.builder()
+                .title("test game 5")
+                .creator("creator")
+                .publisher("publisher")
+                .platform("PS5")
+                .ageRating(Arrays.asList("18", "M"))
+                .category("category")
+                .description("description")
+                .yearOfPublishing(2022)
+                .build();
+
+        restTemplate.put("http://localhost:" + port + "/game/" + game.getId(), gameRequest);
+        Optional<Game> updateGameOptional = gameRepository.findById(game.getId());
+        assertTrue(updateGameOptional.isPresent());
+
+        Game updateGame = updateGameOptional.get();
+        assertEquals(Arrays.asList("18", "M"), updateGame.getAgeRating());
     }
 
 }
