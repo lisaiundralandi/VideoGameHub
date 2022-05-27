@@ -1,8 +1,10 @@
 package io.github.lisaiundralandi.game;
 
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class SearchQuery {
     private String title;
     private String creator;
