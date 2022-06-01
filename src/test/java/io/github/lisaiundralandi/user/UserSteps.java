@@ -5,6 +5,7 @@ import io.cucumber.java.pl.Kiedy;
 import io.cucumber.java.pl.Wtedy;
 import io.cucumber.java.pl.Zakładającże;
 import io.github.lisaiundralandi.ErrorResponse;
+import io.github.lisaiundralandi.PasswordUtil;
 import io.github.lisaiundralandi.user.entity.User;
 import io.github.lisaiundralandi.user.entity.UserType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SuppressWarnings({"NonAsciiCharacters", "SpringJavaAutowiredMembersInspection"})
 public class UserSteps {
 
     @LocalServerPort
@@ -27,7 +29,11 @@ public class UserSteps {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordUtil passwordUtil;
+
     private ResponseEntity<ErrorResponse> response;
+    private ResponseEntity<Void> loginResponse;
 
     @Before
     public void clean() {
@@ -61,6 +67,25 @@ public class UserSteps {
     @Zakładającże("użytkownik z loginem {string} już istnieje")
     public void użytkownik_z_loginem_już_istnieje(String login) {
         userRepository.save(new User(login, new byte[]{}, UserType.STANDARD));
+    }
+
+    @Zakładającże("użytkownik z loginem {string} i hasłem {string} istnieje")
+    public void użytkownik_z_loginem_i_hasłem_istnieje(String login, String password) {
+
+        byte[] result = passwordUtil.hash(password);
+        userRepository.save(new User(login, result, UserType.STANDARD));
+    }
+
+    @Kiedy("podam login {string} i hasło {string}")
+    public void podam_login_i_hasło(String login, String password) {
+        LoginRequest loginRequest = new LoginRequest(login, password);
+        response = restTemplate.postForEntity("http://localhost:" + port + "/login",
+                loginRequest, ErrorResponse.class);
+    }
+
+    @Wtedy("użytkownik powinien zostać poprawnie zalogowany")
+    public void użytkownik_powinien_zostać_poprawnie_zalogowany() {
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
 }
