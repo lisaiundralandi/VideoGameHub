@@ -33,7 +33,6 @@ public class UserSteps {
     private PasswordUtil passwordUtil;
 
     private ResponseEntity<ErrorResponse> response;
-    private ResponseEntity<Void> loginResponse;
 
     @Before
     public void clean() {
