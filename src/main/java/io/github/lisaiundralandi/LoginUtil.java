@@ -16,7 +16,7 @@ public class LoginUtil {
 
     public void checkIfLogged() {
         if (!currentLogin.isLogged()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You need to login");
         }
     }
 

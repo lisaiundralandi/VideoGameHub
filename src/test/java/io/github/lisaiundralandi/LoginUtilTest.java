@@ -16,8 +16,11 @@ class LoginUtilTest {
 
     @Test
     void shouldThrowExceptionIfNotLogged() {
-        HttpStatus status = assertThrows(ResponseStatusException.class, loginUtil::checkIfLogged).getStatus();
+        ResponseStatusException responseStatusException = assertThrows(ResponseStatusException.class,
+                loginUtil::checkIfLogged);
+        HttpStatus status = responseStatusException.getStatus();
         assertEquals(HttpStatus.UNAUTHORIZED, status);
+        assertEquals("401 UNAUTHORIZED \"You need to login\"", responseStatusException.getMessage());
     }
 
     @Test
