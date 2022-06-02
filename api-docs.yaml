@@ -152,6 +152,8 @@ paths:
           description: Użytkownik niezalogowany
         "403":
           description: Użytkownik nie jest administratorem
+        "404":
+          description: Gra nie istnieje
   /login:
     post:
       tags:

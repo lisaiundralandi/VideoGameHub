@@ -16,6 +16,7 @@ import io.github.lisaiundralandi.user.entity.UserType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -45,6 +46,7 @@ public class GameSteps {
 
     ResponseEntity<JsonNode> response;
     String login;
+    Long gameId = -1L;
 
     @Zakładającże("użytkownik z loginem {string} istnieje i jest zalogowany")
     public void użytkownik_z_loginem_istnieje_i_jest_zalogowany(String login) {
@@ -78,6 +80,11 @@ public class GameSteps {
 
         response = restTemplate.postForEntity("http://localhost:" + port + "/game",
                 gameRequest, JsonNode.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode body = Objects.requireNonNull(response.getBody());
+            gameId = body.asLong();
+        }
     }
 
     @Wtedy("gra zostanie dodana pomyślnie")
@@ -87,11 +94,8 @@ public class GameSteps {
 
     @Wtedy("szczegóły gry to")
     public void szczegóły_gry_to(io.cucumber.datatable.DataTable dataTable) {
-        JsonNode body = Objects.requireNonNull(response.getBody());
-        long id = body.asLong();
-
         ResponseEntity<Game> gameResponse = restTemplate.getForEntity(
-                "http://localhost:" + port + "/game/" + id,
+                "http://localhost:" + port + "/game/" + gameId,
                 Game.class);
 
         Map<String, String> game = dataTable.asMap();
@@ -99,7 +103,7 @@ public class GameSteps {
                 .split(", ");
 
         Game expected = Game.builder()
-                .id(id)
+                .id(gameId)
                 .title(game.get("title"))
                 .creator(game.get("creator"))
                 .publisher(game.get("publisher"))
@@ -128,5 +132,33 @@ public class GameSteps {
     @Zakładającże("nie jestem zalogowana")
     public void nie_jestem_zalogowana() {
         restTemplate.delete("http://localhost:" + port + "/login");
+    }
+
+    @Zakładającże("administrator z loginem {string} istnieje i jest zalogowany")
+    public void administrator_z_loginem_istnieje_i_jest_zalogowany(String login) {
+        String password = "Password123!";
+        byte[] result = passwordUtil.hash(password);
+        userRepository.save(new User(login, result, UserType.ADMIN));
+
+        LoginRequest loginRequest = new LoginRequest(login, password);
+        restTemplate.postForEntity("http://localhost:" + port + "/login",
+                loginRequest, Void.class);
+
+        this.login = login;
+    }
+
+    @Kiedy("usunę grę")
+    public void usunę_grę() {
+        response = restTemplate.exchange("http://localhost:" + port + "/game/" + gameId,
+                HttpMethod.DELETE, null, JsonNode.class);
+    }
+
+    @Wtedy("gra zostanie usunięta pomyślnie")
+    public void gra_zostanie_usunięta_pomyślnie() {
+        ResponseEntity<ErrorResponse> gameResponse = restTemplate.getForEntity(
+                "http://localhost:" + port + "/game/" + gameId,
+                ErrorResponse.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
     }
 }

@@ -77,11 +77,17 @@ public class GameController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Gra usunięta pomyślnie"),
                     @ApiResponse(responseCode = "401", description = "Użytkownik niezalogowany"),
-                    @ApiResponse(responseCode = "403", description = "Użytkownik nie jest administratorem")
+                    @ApiResponse(responseCode = "403", description = "Użytkownik nie jest administratorem"),
+                    @ApiResponse(responseCode = "404", description = "Gra nie istnieje")
             })
     public void deleteGame(@PathVariable long id) {
         loginUtil.checkAccess(UserType.ADMIN);
 
+        Optional<Game> optionalGame = gameRepository.findById(id);
+
+        if (optionalGame.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         userLibraryRepository.deleteAllByGameId(id);
         gameRepository.deleteById(id);
     }
