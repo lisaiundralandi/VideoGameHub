@@ -11,6 +11,7 @@ import io.github.lisaiundralandi.user.entity.UserType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -86,5 +87,21 @@ public class UserSteps {
     public void użytkownik_powinien_zostać_poprawnie_zalogowany() {
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+
+    @Zakładającże("użytkownik z loginem {string} i hasłem {string} istnieje i jest zalogowany")
+    public void użytkownik_z_loginem_i_hasłem_istnieje_i_jest_zalogowany(String login, String password) {
+        byte[] result = passwordUtil.hash(password);
+        userRepository.save(new User(login, result, UserType.STANDARD));
+        LoginRequest loginRequest = new LoginRequest(login, password);
+        response = restTemplate.postForEntity("http://localhost:" + port + "/login",
+                loginRequest, ErrorResponse.class);
+    }
+
+    @Kiedy("wyślę żądanie usunięcia konta")
+    public void wyślę_żądanie_usunięcia_konta() {
+        response = restTemplate.exchange("http://localhost:" + port + "/user",
+                HttpMethod.DELETE, null, ErrorResponse.class);
+    }
+
 
 }

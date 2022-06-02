@@ -43,3 +43,7 @@ W pliku [VGH.postman_collection.json](VGH.postman_collection.json). Do niektóry
 gry)
 użytkownik musi być administratorem.
 
+## Scenariusze Cucumber
+
+Scenariusze znajdują się w folderze [src/test/resources/scenarios](src/test/resources/scenarios).
+
