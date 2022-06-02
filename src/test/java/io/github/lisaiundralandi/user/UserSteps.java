@@ -11,6 +11,7 @@ import io.github.lisaiundralandi.user.entity.UserType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -103,5 +104,11 @@ public class UserSteps {
                 HttpMethod.DELETE, null, ErrorResponse.class);
     }
 
-
+    @Kiedy("wykonam zmianę hasła podając stare hasło {string}, nowe hasło {string} i potwierdzenie hasła {string}")
+    public void wykonam_zmianę_hasła(String oldPassword, String newPassword, String passwordConfirmations) {
+        ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest(oldPassword, newPassword,
+                passwordConfirmations);
+        response = restTemplate.exchange("http://localhost:" + port + "/user",
+                HttpMethod.PUT, new HttpEntity<>(changePasswordRequest), ErrorResponse.class);
+    }
 }
