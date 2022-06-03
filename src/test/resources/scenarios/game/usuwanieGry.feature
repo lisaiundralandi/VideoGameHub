@@ -34,3 +34,4 @@ Funkcja: Usuwanie gry
     Zakładając, że administrator z loginem "admin" istnieje i jest zalogowany
     Kiedy usunę grę
     Wtedy powinien zostać zwrócony błąd NOT_FOUND
+    I komunikat błędu "Game does not exist"

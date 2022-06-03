@@ -67,3 +67,4 @@ Funkcja: Aktualizacja szczegółów gry
       | category         | souls-like   |
       | description      | You died!    |
     Wtedy powinien zostać zwrócony błąd NOT_FOUND
+    I komunikat błędu "Game does not exist"

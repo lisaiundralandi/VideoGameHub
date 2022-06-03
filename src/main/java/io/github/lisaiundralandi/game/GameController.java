@@ -132,7 +132,7 @@ public class GameController {
         Optional<Game> optionalGame = gameRepository.findById(id);
 
         if (optionalGame.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Game does not exist");
         }
         return optionalGame.get();
     }
