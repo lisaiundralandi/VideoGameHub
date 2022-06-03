@@ -63,12 +63,7 @@ public class GameController {
             @ApiResponse(responseCode = "404", description = "Gra nie istnieje")
     })
     public Game getGame(@PathVariable long id) {
-        Optional<Game> game = gameRepository.findById(id);
-        if (game.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        } else {
-            return game.get();
-        }
+        return getGameFromRepo(id);
     }
 
     @Transactional
@@ -83,11 +78,7 @@ public class GameController {
     public void deleteGame(@PathVariable long id) {
         loginUtil.checkAccess(UserType.ADMIN);
 
-        Optional<Game> optionalGame = gameRepository.findById(id);
-
-        if (optionalGame.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        getGameFromRepo(id);
         userLibraryRepository.deleteAllByGameId(id);
         gameRepository.deleteById(id);
     }
@@ -103,12 +94,7 @@ public class GameController {
     public void updateGame(@PathVariable long id, @RequestBody @Valid GameRequest gameRequest) {
         loginUtil.checkAccess(UserType.ADMIN);
 
-        Optional<Game> optionalGame = gameRepository.findById(id);
-
-        if (optionalGame.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        Game game = optionalGame.get();
+        Game game = getGameFromRepo(id);
         game.setTitle(gameRequest.getTitle());
         game.setCreator(gameRequest.getCreator());
         game.setPublisher(gameRequest.getPublisher());
@@ -140,5 +126,14 @@ public class GameController {
         return query == null ||
                 (!Strings.isEmpty(query)
                         && value.contains(query));
+    }
+
+    private Game getGameFromRepo(long id) {
+        Optional<Game> optionalGame = gameRepository.findById(id);
+
+        if (optionalGame.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return optionalGame.get();
     }
 }

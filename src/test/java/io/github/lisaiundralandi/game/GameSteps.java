@@ -16,6 +16,7 @@ import io.github.lisaiundralandi.user.entity.UserType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -160,5 +161,31 @@ public class GameSteps {
                 ErrorResponse.class);
 
         assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
+    }
+
+    @Kiedy("zaktualizuję grę")
+    public void zaktualizuję_grę(io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> game = dataTable.asMap();
+        String[] ageRatings = game.get("ageRating")
+                .split(", ");
+
+        GameRequest gameRequest = GameRequest.builder()
+                .title(game.get("title"))
+                .creator(game.get("creator"))
+                .publisher(game.get("publisher"))
+                .platform(game.get("platform"))
+                .yearOfPublishing(Integer.parseInt(game.get("yearOfPublishing")))
+                .ageRating(Arrays.asList(ageRatings))
+                .category(game.get("category"))
+                .description(game.get("description"))
+                .build();
+
+        response = restTemplate.exchange("http://localhost:" + port + "/game/" + gameId,
+                HttpMethod.PUT, new HttpEntity<>(gameRequest), JsonNode.class);
+    }
+
+    @Wtedy("gra zostanie zaktualizowana pomyślnie")
+    public void gra_zostanie_zaktualizowana_pomyślnie() {
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }
