@@ -44,7 +44,7 @@ public class UserLibraryController {
         loginUtil.checkIfLogged();
         Optional<Game> optionalGame = gameRepository.findById(request.getId());
         if (optionalGame.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Game does not exist");
         }
         validateRating(request.getRating());
         userLibraryRepository.save(new GameInLibrary(
