@@ -17,6 +17,7 @@ import io.github.lisaiundralandi.user.entity.User;
 import io.github.lisaiundralandi.user.entity.UserType;
 import io.github.lisaiundralandi.user.library.AddGameToLibraryRequest;
 import io.github.lisaiundralandi.user.library.UserLibraryRepository;
+import io.github.lisaiundralandi.user.library.entity.GameInLibrary;
 import io.github.lisaiundralandi.user.library.entity.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -24,10 +25,13 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings({"SpringJavaAutowiredMembersInspection", "NonAsciiCharacters"})
 public class UserLibrarySteps {
@@ -54,6 +58,7 @@ public class UserLibrarySteps {
 
     Long gameId = -1L;
     ResponseEntity<JsonNode> response;
+    String login;
 
     @After
     public void clean() {
@@ -63,10 +68,11 @@ public class UserLibrarySteps {
     }
 
     @Zakładającże("jestem zalogowana jako użytkownik z loginem {string}")
-    public void użytkownik_z_loginem_istnieje_i_jest_zalogowany(String login) {
+    public void jestem_zalogowana_jako_użytkownik_z_loginem(String login) {
         String password = "Password123!";
         byte[] result = passwordUtil.hash(password);
         userRepository.save(new User(login, result, UserType.STANDARD));
+        this.login = login;
 
         LoginRequest loginRequest = new LoginRequest(login, password);
         restTemplate.postForEntity("http://localhost:" + port + "/login",
@@ -122,5 +128,106 @@ public class UserLibrarySteps {
     @Zakładającże("nie jestem zalogowana")
     public void nie_jestem_zalogowana() {
         restTemplate.delete("http://localhost:" + port + "/login");
+    }
+
+    @Zakładającże("w bibliotece użytkownika są następujące gry")
+    public void w_bibliotece_użytkownika_są_następujące_gry(io.cucumber.datatable.DataTable dataTable) {
+        List<Map<String, String>> maps = dataTable.asMaps();
+
+        for (var map : maps) {
+            String[] ageRatings = map.get("ageRating")
+                    .split(", ");
+
+            Game game = gameRepository.save(Game.builder()
+                    .title(map.get("title"))
+                    .creator(map.get("creator"))
+                    .publisher(map.get("publisher"))
+                    .platform(map.get("platform"))
+                    .yearOfPublishing(Integer.parseInt(map.get("yearOfPublishing")))
+                    .ageRating(Arrays.asList(ageRatings))
+                    .category(map.get("category"))
+                    .description(map.get("description"))
+                    .addedBy(map.get("addedBy"))
+                    .build());
+
+            String ratingString = map.get("rating");
+            Double rating = null;
+            if (ratingString != null) {
+                rating = Double.parseDouble(ratingString);
+            }
+
+            String statusString = map.get("status");
+            Status status = null;
+            if (statusString != null) {
+                status = Status.valueOf(statusString);
+            }
+
+            boolean played = Boolean.parseBoolean(map.get("played"));
+
+            userLibraryRepository.save(new GameInLibrary(
+                    login, null, game.getId(), game, rating, status, played
+            ));
+        }
+    }
+
+    @Kiedy("pobiorę listę gier z biblioteki")
+    public void pobiorę_listę_gier_z_biblioteki() {
+        response = restTemplate.getForEntity(
+                "http://localhost:" + port + "/library", JsonNode.class);
+    }
+
+    @Wtedy("powinna zostać zwrócona lista gier")
+    public void powinna_zostać_zwrócona_lista_gier(
+            io.cucumber.datatable.DataTable dataTable) throws JsonProcessingException {
+        List<Map<String, String>> maps = dataTable.asMaps();
+
+        List<Game> expected = new ArrayList<>();
+
+        for (var game : maps) {
+            String[] ageRatings = game.get("ageRating")
+                    .split(", ");
+
+            expected.add(Game.builder()
+                    .title(game.get("title"))
+                    .creator(game.get("creator"))
+                    .publisher(game.get("publisher"))
+                    .platform(game.get("platform"))
+                    .yearOfPublishing(Integer.parseInt(game.get("yearOfPublishing")))
+                    .ageRating(Arrays.asList(ageRatings))
+                    .category(game.get("category"))
+                    .description(game.get("description"))
+                    .addedBy(game.get("addedBy"))
+                    .build());
+        }
+
+        JsonNode body = response.getBody();
+        assertNotNull(body);
+
+        assertEquals(expected.size(), body.size());
+
+        for (int i = 0; i < body.size(); i++) {
+            GameInLibrary gameInLibrary = objectMapper.treeToValue(body.get(i), GameInLibrary.class);
+
+            Game expectedGame = expected.get(i);
+
+            assertEquals(expectedGame.getTitle(), gameInLibrary.getGame()
+                    .getTitle());
+            assertEquals(expectedGame.getCreator(), gameInLibrary.getGame()
+                    .getCreator());
+            assertEquals(expectedGame.getPublisher(), gameInLibrary.getGame()
+                    .getPublisher());
+            assertEquals(expectedGame.getPlatform(), gameInLibrary.getGame()
+                    .getPlatform());
+            assertEquals(expectedGame.getYearOfPublishing(), gameInLibrary.getGame()
+                    .getYearOfPublishing());
+            assertEquals(expectedGame.getCategory(), gameInLibrary.getGame()
+                    .getCategory());
+            assertEquals(expectedGame.getAddedBy(), gameInLibrary.getGame()
+                    .getAddedBy());
+            assertEquals(expectedGame.getDescription(), gameInLibrary.getGame()
+                    .getDescription());
+            assertEquals(expectedGame.getAgeRating(), gameInLibrary.getGame()
+                    .getAgeRating());
+        }
     }
 }
