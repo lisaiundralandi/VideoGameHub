@@ -76,10 +76,12 @@ public class UserLibraryController {
     public void removeGame(@RequestParam("id") long id) {
         loginUtil.checkIfLogged();
 
-        if (!gameRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        GameInLibraryId gameInLibraryId = new GameInLibraryId(currentLogin.getLogin(), id);
+
+        if (!userLibraryRepository.existsById(gameInLibraryId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Game had not been added to library");
         }
-        userLibraryRepository.deleteById(new GameInLibraryId(currentLogin.getLogin(), id));
+        userLibraryRepository.deleteById(gameInLibraryId);
     }
 
     @PutMapping(path = "/library/{gameId}")
@@ -97,7 +99,7 @@ public class UserLibraryController {
                 new GameInLibraryId(currentLogin.getLogin(), gameId));
 
         if (optionalGameInLibrary.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Game had not been added to library");
         }
         GameInLibrary game = optionalGameInLibrary.get();
         validateRating(request.getRating());

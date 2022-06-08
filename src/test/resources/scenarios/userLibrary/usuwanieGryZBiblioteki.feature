@@ -18,3 +18,4 @@ Funkcja: Usuwanie gry z biblioteki użytkownika
       | 2  | Horizon: Forbidden West | Guerilla     | Sony Interactive Entertainment | PS5      | 2022             | 16, M     | akcji      | Continuation of Horizon: Zero Dawn | admin   | 8.0    | OWNED  | true   |
     Kiedy usunę grę o id 4
     Wtedy powinien zostać zwrócony błąd NOT_FOUND
+    I komunikat błędu "Game had not been added to library"
