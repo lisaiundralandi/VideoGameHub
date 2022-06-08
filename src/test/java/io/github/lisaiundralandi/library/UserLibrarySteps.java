@@ -16,12 +16,14 @@ import io.github.lisaiundralandi.user.UserRepository;
 import io.github.lisaiundralandi.user.entity.User;
 import io.github.lisaiundralandi.user.entity.UserType;
 import io.github.lisaiundralandi.user.library.AddGameToLibraryRequest;
+import io.github.lisaiundralandi.user.library.UpdateGameRequest;
 import io.github.lisaiundralandi.user.library.UserLibraryRepository;
 import io.github.lisaiundralandi.user.library.entity.GameInLibrary;
 import io.github.lisaiundralandi.user.library.entity.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -276,5 +278,41 @@ public class UserLibrarySteps {
         response = restTemplate.getForEntity(
                 "http://localhost:" + port + "/library/find?" + statusParam + "&" + ratingParam + "&" + playedParam,
                 JsonNode.class);
+    }
+
+    @Kiedy("zaktualizuję grę o id {int}")
+    public void zaktualizuję_grę_o_id(Integer id, io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> map = dataTable.asMap();
+
+        String ratingString = map.get("rating");
+        Double rating = null;
+        if (ratingString != null) {
+            rating = Double.parseDouble(ratingString);
+        }
+
+        String statusString = map.get("status");
+        Status status = null;
+        if (statusString != null) {
+            status = Status.valueOf(statusString);
+        }
+
+        boolean played = Boolean.parseBoolean(map.get("played"));
+
+
+        Game game = games.getOrDefault(id, Game.builder()
+                .id(-1)
+                .build());
+        long realId = game.getId();
+
+        UpdateGameRequest updateGameRequest = new UpdateGameRequest(rating, status, played);
+
+        response = restTemplate.exchange("http://localhost:" + port + "/library/" + realId,
+                HttpMethod.PUT, new HttpEntity<>(updateGameRequest), JsonNode.class);
+
+    }
+
+    @Wtedy("gra powinna zostać zaktualizowana pomyślnie")
+    public void gra_powinna_zostać_zaktualizowana_pomyślnie() {
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }
