@@ -250,4 +250,31 @@ public class UserLibrarySteps {
     public void gra_zostanie_usunięta_pomyślnie() {
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+
+    @Kiedy("wyszukam gry pasujące do kryteriów")
+    public void wyszukam_gry_pasujące_do_kryteriów(io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> map = dataTable.asMap();
+
+        String ratingString = map.get("rating");
+        String ratingParam = null;
+        if (ratingString != null) {
+            ratingParam = "rating=" + Double.parseDouble(ratingString);
+        }
+
+        String statusString = map.get("status");
+        String statusParam = "";
+        if (statusString != null) {
+            statusParam = "status=" + Status.valueOf(statusString);
+        }
+
+        String playedString = map.get("played");
+        String playedParam = "";
+        if (playedString != null) {
+            playedParam = "played=" + Boolean.parseBoolean(playedString);
+        }
+
+        response = restTemplate.getForEntity(
+                "http://localhost:" + port + "/library/find?" + statusParam + "&" + ratingParam + "&" + playedParam,
+                JsonNode.class);
+    }
 }
