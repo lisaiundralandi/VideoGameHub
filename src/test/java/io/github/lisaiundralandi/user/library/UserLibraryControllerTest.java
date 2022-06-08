@@ -144,7 +144,7 @@ class UserLibraryControllerTest {
                 "libraryTester", null, gameId, null, 9.0, Status.OWNED, true));
 
         ResponseEntity<GameInLibraryResponse[]> response = restTemplate.getForEntity(
-                "http://localhost:" + port + "/library/?status=" + Status.OWNED + "&rating=9.0&played=true",
+                "http://localhost:" + port + "/library/find?status=" + Status.OWNED + "&rating=9.0&played=true",
                 GameInLibraryResponse[].class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
