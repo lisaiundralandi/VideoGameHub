@@ -22,13 +22,11 @@ import io.github.lisaiundralandi.user.library.entity.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -59,6 +57,7 @@ public class UserLibrarySteps {
     Long gameId = -1L;
     ResponseEntity<JsonNode> response;
     String login;
+    private final Map<Integer, Game> games = new HashMap<>();
 
     @After
     public void clean() {
@@ -150,6 +149,11 @@ public class UserLibrarySteps {
                     .addedBy(map.get("addedBy"))
                     .build());
 
+            String id = map.get("id");
+            if (id != null) {
+                games.put(Integer.parseInt(id), game);
+            }
+
             String ratingString = map.get("rating");
             Double rating = null;
             if (ratingString != null) {
@@ -229,5 +233,21 @@ public class UserLibrarySteps {
             assertEquals(expectedGame.getAgeRating(), gameInLibrary.getGame()
                     .getAgeRating());
         }
+    }
+
+    @Kiedy("usunę grę o id {int}")
+    public void usunę_grę_o_id(int id) {
+        Game game = games.getOrDefault(id, Game.builder()
+                .id(-1)
+                .build());
+        long realId = game.getId();
+
+        response = restTemplate.exchange("http://localhost:" + port + "/library?id=" + realId, HttpMethod.DELETE,
+                null, JsonNode.class);
+    }
+
+    @Wtedy("gra zostanie usunięta pomyślnie")
+    public void gra_zostanie_usunięta_pomyślnie() {
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }
